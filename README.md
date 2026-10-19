@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🎬 DAMFlix · Parte 2
+# 🎬 DAMFlix · Parte 3
 
 **Aplicación Android para almacenar y consultar películas**
 
@@ -11,7 +11,7 @@
 
 **Módulo:** Programación Multimedia y Dispositivos Móviles  
 **Unidad de Trabajo Nº2:** Desarrollo de aplicaciones Android  
-**Parte 2 · Actividad 2:** Formulario de Alta e Interacción con Estado  
+**Parte 3 · Actividad 3:** Catálogo Dinámico  
 
 2º DAM · CIFP Villa de Agüimes
 
@@ -21,65 +21,117 @@
 
 ## 🎯 Objetivo
 
-Añadir interactividad a la aplicación construyendo un formulario de registro de nuevas películas, utilizando la gestión de estado de **Jetpack Compose**.
+Convertir los datos de las películas en una lista scrollable altamente optimizada, utilizando la estructura de componentes de **Material Design 3**.
 
 ## ✅ Requisitos funcionales
 
 | Requisito | Cómo se cumple |
 |---|---|
-| **1. Campos de entrada** | Tres `OutlinedTextField`: título de la película, director/a y año de estreno |
-| **2. Selección e interacción** | `Checkbox` para indicar si la película ya ha sido vista o está pendiente |
-| **3. Gestión de estado** | El contenido de los campos se guarda con `remember` y `mutableStateOf` |
-| **4. Validación dinámica** | El botón "Guardar Película" permanece deshabilitado si el título o el director están vacíos |
+| **1. Estructura Scaffold** | La pantalla `PantallaCatalogoDAMFlix()` está dentro de un `Scaffold` con una `TopAppBar` ("DAMFlix - Catálogo") |
+| **2. Catálogo dinámico** | Las 15 películas se muestran con un `LazyColumn` scrollable, una `Card` por película |
+| **3. Acción interactiva** | Cada tarjeta tiene un `IconButton` con icono de corazón para marcar o desmarcar la película como favorita, y la tarjeta se recompone al instante |
+| **4. Optimizaciones** | Se asigna una clave única a cada elemento con `key = { p -> p.id }` en `items()` |
 
 ## ⚙️ Funcionamiento
 
-El formulario es el composable `FormularioPelicula()`, que guarda cuatro estados:
+### Modelo de datos
+
+Cada película es un objeto `Pelicula` con un identificador, un título y un estado de favorita:
 
 ```kotlin
-var titulo by remember { mutableStateOf("") }
-var director by remember { mutableStateOf("") }
-var anio by remember { mutableStateOf("") }
-var esVista by remember { mutableStateOf(false) }
+class Pelicula(val id: Int, val titulo: String) {
+    var esFavorita by mutableStateOf(false)
+}
 ```
 
-1. Cada `OutlinedTextField` muestra su estado con `value` y lo actualiza con `onValueChange`. Al escribir, el estado cambia y Compose vuelve a dibujar la pantalla (recomposición).
-2. El `Checkbox` funciona igual, con un estado booleano (`esVista`).
-3. El botón recalcula si está habilitado en cada recomposición:
+`esFavorita` es un estado de Compose: cuando cambia, las tarjetas que lo leen se recomponen.
+
+### Scaffold y TopAppBar
 
 ```kotlin
-enabled = titulo.isNotBlank() && director.isNotBlank()
+Scaffold(
+    topBar = {
+        TopAppBar(
+            title = { Text("DAMFlix - Catálogo") },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer
+            )
+        )
+    }
+) { innerPadding ->
+    Box(modifier = Modifier.padding(innerPadding)) {
+        // ListaPeliculas(...)
+    }
+}
 ```
 
-Si falta el título o el director, el botón se muestra deshabilitado. En cuanto los dos tienen texto, se activa. El año no entra en la validación.
+El `innerPadding` evita que la lista quede tapada por la barra superior.
 
-> De momento el botón no guarda la película: el `onClick` está vacío porque esta actividad solo pide el formulario y la validación.
+### LazyColumn con claves
 
-Todos los textos se consumen desde `strings.xml` con `stringResource()`, sin cadenas escritas a mano.
+```kotlin
+LazyColumn(
+    contentPadding = PaddingValues(16.dp),
+    verticalArrangement = Arrangement.spacedBy(8.dp)
+) {
+    items(items = peliculas, key = { p -> p.id }) { pelicula ->
+        // Card con el título y el IconButton
+    }
+}
+```
+
+`LazyColumn` solo dibuja los elementos visibles en pantalla. La `key` permite a Compose identificar cada película, aunque cambie el orden o el contenido de la lista.
+
+### Botón de favorito
+
+```kotlin
+IconButton(onClick = { onToggleFavorito(pelicula.id) }) {
+    Icon(
+        imageVector = if (pelicula.esFavorita) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+        contentDescription = "Favorito",
+        tint = if (pelicula.esFavorita) Color.Red else Color.Gray
+    )
+}
+```
+
+- Película favorita: corazón relleno y rojo.
+- Película no favorita: corazón vacío y gris.
+
+Al pulsar el botón, la pantalla busca la película por su `id` y cambia su estado:
+
+```kotlin
+val pelicula = peliculas.first { it.id == id }
+pelicula.esFavorita = !pelicula.esFavorita
+```
+
+> En `ListaPeliculas` están comentados `PerfilUsuario()` y `FormularioPelicula()`, porque son de las partes 1 y 2 y esta actividad no los pide. Las funciones siguen en `MainActivity.kt`.
 
 ## 🗂️ Estructura
 
 ```
 app/src/main
 ├── java/com/example/damflix
-│   └── MainActivity.kt        # FormularioPelicula (y la pantalla de perfil de la Parte 1)
+│   └── MainActivity.kt        # PantallaCatalogoDAMFlix, ListaPeliculas, Pelicula
+│                              # (más el perfil y el formulario de las partes 1 y 2)
 └── res
     └── values
-        └── strings.xml        # Textos de la interfaz
+        └── strings.xml        # Textos del perfil y del formulario
 ```
 
-## 🧪 Cómo probar el formulario
+## 🧪 Cómo probar el catálogo
 
-1. Al abrir la app, el botón "Guardar Película" está deshabilitado.
-2. Escribe solo el título: sigue deshabilitado.
-3. Escribe también el director: se habilita.
-4. Borra el título o el director: vuelve a deshabilitarse.
+1. Al abrir la app se ve la barra superior "DAMFlix - Catálogo" y la lista de 15 películas de ejemplo.
+2. Todos los corazones empiezan vacíos y grises.
+3. Pulsa el corazón de una película: se pone rojo y relleno al momento.
+4. Púlsalo otra vez: vuelve a gris.
+5. Desliza la lista hacia arriba: como las 15 películas no caben en pantalla, se desplaza hasta "Toy Story".
+6. Marca un favorito, desplázate y vuelve: el corazón sigue rojo, porque cada película conserva su estado.
 
 ## 🚀 Cómo ejecutarlo
 
 1. Clona el repositorio:
 ```bash
-git clone https://github.com/ivanhernandezbetancor/DAMFlix-PARTE-2.git
+git clone https://github.com/ivanhernandezbetancor/DAMFlix-PARTE-3.git
 ```
 2. Ábrelo con **Android Studio**.
 3. Espera a que termine la sincronización de Gradle.
@@ -90,3 +142,11 @@ git clone https://github.com/ivanhernandezbetancor/DAMFlix-PARTE-2.git
 - Kotlin
 - Jetpack Compose
 - Material 3
+
+### Dependencia necesaria
+
+Los iconos `Favorite` y `FavoriteBorder` requieren esta línea en `dependencies` de `app/build.gradle.kts`:
+
+```kotlin
+implementation("androidx.compose.material:material-icons-core")
+```
