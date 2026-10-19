@@ -28,7 +28,7 @@ Convertir los datos de las películas en una lista scrollable altamente optimiza
 | Requisito | Cómo se cumple |
 |---|---|
 | **1. Estructura Scaffold** | La pantalla `PantallaCatalogoDAMFlix()` está dentro de un `Scaffold` con una `TopAppBar` ("DAMFlix - Catálogo") |
-| **2. Catálogo dinámico** | Las películas se muestran con un `LazyColumn`, una `Card` por película |
+| **2. Catálogo dinámico** | Las 15 películas se muestran con un `LazyColumn` scrollable, una `Card` por película |
 | **3. Acción interactiva** | Cada tarjeta tiene un `IconButton` con icono de corazón para marcar o desmarcar la película como favorita, y la tarjeta se recompone al instante |
 | **4. Optimizaciones** | Se asigna una clave única a cada elemento con `key = { p -> p.id }` en `items()` |
 
@@ -120,11 +120,12 @@ app/src/main
 
 ## 🧪 Cómo probar el catálogo
 
-1. Al abrir la app se ve la barra superior "DAMFlix - Catálogo" y la lista de películas.
+1. Al abrir la app se ve la barra superior "DAMFlix - Catálogo" y la lista de 15 películas de ejemplo.
 2. Todos los corazones empiezan vacíos y grises.
 3. Pulsa el corazón de una película: se pone rojo y relleno al momento.
 4. Púlsalo otra vez: vuelve a gris.
-5. Desplaza la lista para comprobar que es scrollable.
+5. Desliza la lista hacia arriba: como las 15 películas no caben en pantalla, se desplaza hasta "Toy Story".
+6. Marca un favorito, desplázate y vuelve: el corazón sigue rojo, porque cada película conserva su estado.
 
 ## 🚀 Cómo ejecutarlo
 
