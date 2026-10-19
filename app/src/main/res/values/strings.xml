@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">DAMflix</string>
+
+    <!-- Actividad 1 -->
+     <string name="avatar_desc">Avatar del usuario</string>
+     <string name="user_name">Laura Gómez</string>
+     <string name="user_rol">Crítico de Cine</string>
+     <string name="estadisticas_peliculas">%1$d Películas Vistas</string>
+     <string name="estadisticas_resenas">%1$d Reseñas</string>
+
+     <!-- Actividad 2 -->
+
+    <string name="titulo_pelicula">Título de la Película</string>
+    <string name="director_pelicula">Director/a</string>
+    <string name="anio_estreno">Año de estreno</string>
+    <string name="pelicula_vista">Ya he visto esta película</string>
+    <string name="guardar_pelicula">Guardar Película</string>
+</resources>
